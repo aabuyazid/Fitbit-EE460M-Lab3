@@ -1,3 +1,5 @@
+`timescale 1ns / 1ps
+
 module DisplayController(
     input CLK,
     input [15:0] fitbit_data,

@@ -1,3 +1,5 @@
+`timescale 1ns / 1ps
+
 module hexto7segment(
     input [3:0] x,
     output reg [6:0] r

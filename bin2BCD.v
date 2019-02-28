@@ -1,3 +1,5 @@
+`timescale 1ns / 1ps
+
 `define UNDERLINE 15
 
 module bin2BCD(

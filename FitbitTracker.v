@@ -1,4 +1,6 @@
-module FitbitTracker(CLK,pulse,reset,display,decimal_number,SI);
+`timescale 1ns / 1ps
+
+module FitbitTracker(CLK,pulse,reset,display,is_miles,SI);
 
 input CLK, pulse, reset;
 output [15:0] display;  

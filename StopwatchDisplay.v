@@ -1,3 +1,5 @@
+`timescale 1ns / 1ps
+
 module StopwatchDisplay(
     input clk,
     input [27:0] sev_seg_data,
