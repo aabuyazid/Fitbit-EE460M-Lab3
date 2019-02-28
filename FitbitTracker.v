@@ -2,13 +2,13 @@ module FitbitTracker(CLK,pulse,reset,display,decimal_number,SI);
 
 input CLK, pulse, reset;
 output [15:0] display;  
-output decimal_number, SI;
+output is_miles, SI;
 
 reg second = 0;
 reg under32 = 0;
 
 reg [15:0] display_reg = 0;
-reg decimal_number_reg = 0;
+reg is_miles_reg = 0;
 reg SI_reg = 0;
 
 reg [26:0] second_divider = 0;
@@ -26,7 +26,7 @@ reg [15:0] over32_time = 0;
 reg [15:0] over32_highest_time = 0;
 
 assign display = display_reg;
-assign decimal_number = decimal_number_reg;
+assign is_miles = is_miles_reg;
 assign SI = SI_reg;
 
 
@@ -128,21 +128,21 @@ begin
                 display_reg = total_steps;
                 SI_reg = 0;
             end
-            decimal_number_reg = 0;
+            is_miles_reg = 0;
         end
         1: begin
             display_reg = distance_traveled;
-            decimal_number_reg = 1;
+            is_miles_reg = 1;
             SI_reg = 0;
         end
         2: begin    
             display_reg = over32_highest_time;
-            decimal_number_reg = 0;
+            is_miles_reg = 0;
             SI_reg = 0;
         end
         3: begin
             display_reg = displayed_high_activity_counter;
-            decimal_number_reg = 0;
+            is_miles_reg = 0;
             SI_reg = 0;
         end
     endcase
