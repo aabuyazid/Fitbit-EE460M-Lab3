@@ -44,7 +44,14 @@ module Full_Pulse(select, pulseBase, pulseOut);
     
     Seconds t1 (pulseBase, sec);
     assign pulseOut = pulseIt;
-    always@(posedge select[0], posedge select[1], posedge sec) begin
+    always@(posedge sec) begin
+        if (select == 2'b11) clock = clock + 1;
+            else begin
+                clock = 0;
+                run = 1;
+            end
+    end
+    always@(select) begin
         case({clock, select})
             12'b000000000000 : countComp = `count32;
             12'b000000000001 : countComp = `count64;
@@ -82,11 +89,6 @@ module Full_Pulse(select, pulseBase, pulseOut);
             end
         endcase
         count = 0;
-        if (select == 2'b11) clock = clock + 1;
-        else begin
-            clock = 0;
-            run = 1;
-        end
     end
     always@(posedge pulseBase) begin
         if ((count == countComp) & run) begin
