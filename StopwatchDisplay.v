@@ -2,7 +2,7 @@ module StopwatchDisplay(
     input clk,
     input [27:0] sev_seg_data,
     output reg [3:0] an,
-    output reg [6:0] sseg,
+    output reg [6:0] sseg
     );
     
     reg [1:0] state;
