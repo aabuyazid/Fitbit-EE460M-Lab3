@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 
-module Full_Pulse(select, pulseBase, pulseOut);
-    input pulseBase;
+module Full_Pulse(start, reset, select, pulseBase, pulseOut);
+    input start, reset, pulseBase;
     output pulseOut;
     input [1:0] select;
     
@@ -39,11 +39,19 @@ module Full_Pulse(select, pulseBase, pulseOut);
         count = 0;
         pulseIt = 0;
         clock = 0;
+        run = 0;
         countComp = `count32;
     end
     
     Seconds t1 (pulseBase, sec);
     assign pulseOut = pulseIt;
+    always@(posedge start, posedge reset) begin
+        if (start) begin 
+            run = 1;
+            count = 0;
+        end else
+            run = 0;
+    end
     always@(posedge sec) begin
         if (select == 2'b11) clock = clock + 1;
             else begin
