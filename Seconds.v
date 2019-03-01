@@ -4,9 +4,9 @@ module Seconds(pulseBase, seconds);
     input pulseBase;
     output seconds;
     
-    // half of 100MHz/60
-    `define countSec 20'b11001011011100110101
-    reg [19:0] count;
+    // half of 100MHz/1
+    `define countSec 26'd50000000
+    reg [25:0] count;
     reg pulseIt;
     initial begin
         count = 0;
@@ -17,7 +17,7 @@ module Seconds(pulseBase, seconds);
     always@(posedge pulseBase) begin
         if (count == `countSec) begin
             pulseIt = ~pulseIt;
-            count = 0;
+            count = 1;
         end
         else count = count + 1;
     end
