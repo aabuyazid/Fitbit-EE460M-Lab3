@@ -17,7 +17,7 @@ module hexto7segment(
             4'b0111: r = 7'b0001111;
             4'b1000: r = 7'b0000000;
             4'b1001: r = 7'b0000100;
-            4'b1111: r = 7'b1110111; //This is for the underline
+            `UNDERLINE: r = 7'b1110111;
             default: r = 7'b1111111;
         endcase
         

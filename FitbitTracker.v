@@ -1,8 +1,8 @@
 `timescale 1ns / 1ps
 
-module FitbitTracker(CLK,pulse,reset,display,is_miles,SI);
+module FitbitTracker(clk,pulse,reset,display,is_miles,SI);
 
-input CLK, pulse, reset;
+input clk, pulse, reset;
 output [15:0] display;  
 output is_miles, SI;
 
@@ -35,13 +35,13 @@ assign SI = SI_reg;
 /* 
 Defines a second based on CLK
 */
-always @(posedge CLK) 
+always @(posedge clk) 
 begin
     if(second_divider == 500000) begin 
         second <= second + 1;
         second_divider <= 0;
     end
-    second_divider = second_divider + 1;
+    second_divider <= second_divider + 1;
 end
 
 /* 
@@ -49,9 +49,12 @@ Updates total_steps and distance_traveled
 */
 always @(pulse, reset) 
 begin
-    if(reset) total_steps = 0;
-    else if(pulse) total_steps = total_steps + 1;
-    else total_steps = total_steps;
+    case({pulse,reset})
+        2'b11: total_steps = 0;
+        2'b01: total_steps = 0;
+        2'b10: total_steps = total_steps + 1;
+        default: total_steps = total_steps;
+    endcase
     distance_traveled = total_steps >> 10;
 end
 
@@ -60,9 +63,12 @@ Updates steps_per_sec
 */
 always @(pulse, reset) 
 begin
-    if(reset) steps_per_sec = 0;
-    else if(pulse) steps_per_sec = steps_per_sec + 1;
-    else steps_per_sec = steps_per_sec;
+    case({pulse,reset})
+        2'b11: steps_per_sec = 0;
+        2'b01: steps_per_sec = 0;
+        2'b10: steps_per_sec = steps_per_sec + 1;
+        default: steps_per_sec = steps_per_sec;
+    endcase
 end
 /*
 Handles how to Steps over 32/sec
@@ -101,7 +107,7 @@ begin
     if(steps_per_sec >= 64) high_activity_counter <= high_activity_counter + 1;
     else begin
         if(high_activity_counter >= 60) begin 
-        displayed_high_activity_counter <= displayed_high_activity_counter + high_activity_counter;
+            displayed_high_activity_counter <= displayed_high_activity_counter + high_activity_counter;
         end
 
         high_activity_counter <= 0;

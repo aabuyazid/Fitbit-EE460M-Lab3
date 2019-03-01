@@ -11,7 +11,7 @@ module Fitbit(
     output dp
     );
 
-assign dp = 0;
+assign dp = 1;
 
 wire pulseOut;
 
@@ -19,10 +19,18 @@ wire [15:0] display;
 
 wire is_miles;
 
-Full_Pulse pulse (.start(start),.reset(reset),.select(select),.pulseBase(CLK),.pulseOu(pulseOut));
+SquarePulse square (.CLK(CLK), .start(start), 
+    .reset(reset), .select(select), .pulse(pulseOut));
 
-FitbitTracker fit (.CLK(CLK),.pulse(pulseOut),.reset(reset),.display(display),.is_miles(is_miles),.SI(SI));
+/*
+Full_Pulse pulse (.start(start), .reset(reset), .select(select),
+    .pulseBase(CLK), .pulseOut(pulseOut));
+*/
 
-DisplayController dis (.clk(CLK),.fitbit_data(display),.is_miles(is_miles),.an(an),.sseg(sseg));
+FitbitTracker fit (.clk(CLK), .pulse(pulseOut), .reset(reset),
+    .display(display), .is_miles(is_miles),.SI(SI));
+
+DisplayController dis (.clk(CLK), .fitbit_data(display), 
+    .is_miles(is_miles), .an(an), .sseg(sseg));
     
 endmodule
