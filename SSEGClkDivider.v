@@ -12,3 +12,5 @@ assign slow_clk = COUNT[18];
 always @(posedge clk) begin
     COUNT = COUNT + 1;
 end
+
+endmodule

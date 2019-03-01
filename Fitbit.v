@@ -19,13 +19,13 @@ wire [15:0] display;
 
 wire is_miles;
 
+/*
 SquarePulse square (.CLK(CLK), .start(start), 
     .reset(reset), .select(select), .pulse(pulseOut));
-
-/*
-Full_Pulse pulse (.start(start), .reset(reset), .select(select),
-    .pulseBase(CLK), .pulseOut(pulseOut));
 */
+
+Full_Pulse pulse (.start(start), .select(select),
+    .pulseBase(CLK), .pulseOut(pulseOut));
 
 FitbitTracker fit (.clk(CLK), .pulse(pulseOut), .reset(reset),
     .display(display), .is_miles(is_miles),.SI(SI));

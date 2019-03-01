@@ -9,10 +9,14 @@ module bin2BCD(
     );
     reg [15:0] temp;
     
+    reg dec_flag = 0;
+
     always @ (*) begin
-        temp = bin_value;   
+        temp = bin_value;
+         
         if(is_miles) begin
-            if(temp % 2 == 1) BCD_value[3:0] = 5;
+            dec_flag = temp % 2;
+            if(dec_flag) BCD_value[3:0] = 5;
             else BCD_value[3:0] = 0;
             temp = temp >> 1;
             BCD_value[7:4] = `UNDERLINE;

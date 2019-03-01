@@ -31,14 +31,13 @@ assign display = display_reg;
 assign is_miles = is_miles_reg;
 assign SI = SI_reg;
 
-
 /* 
 Defines a second based on CLK
 */
 always @(posedge clk) 
 begin
     if(second_divider == 500000) begin 
-        second <= second + 1;
+        second <= ~second;
         second_divider <= 0;
     end
     second_divider <= second_divider + 1;
@@ -47,28 +46,27 @@ end
 /* 
 Updates total_steps and distance_traveled
 */
-always @(pulse, reset) 
+always @(posedge pulse, posedge reset) 
 begin
-    case({pulse,reset})
-        2'b11: total_steps = 0;
-        2'b01: total_steps = 0;
-        2'b10: total_steps = total_steps + 1;
-        default: total_steps = total_steps;
-    endcase
+    if(reset) 
+        total_steps = 0;
+    else 
+        total_steps = total_steps + 1;
+end
+
+always @(*) begin
     distance_traveled = total_steps >> 10;
 end
 
 /*
 Updates steps_per_sec
 */
-always @(pulse, reset) 
+always @(posedge pulse, posedge reset) 
 begin
-    case({pulse,reset})
-        2'b11: steps_per_sec = 0;
-        2'b01: steps_per_sec = 0;
-        2'b10: steps_per_sec = steps_per_sec + 1;
-        default: steps_per_sec = steps_per_sec;
-    endcase
+    if(reset) 
+        steps_per_sec = 0;
+    else 
+        steps_per_sec = steps_per_sec + 1;
 end
 /*
 Handles how to Steps over 32/sec
@@ -118,7 +116,9 @@ end
 Cycles display_modes
 */
 always @(posedge second) begin
-    display_mode <= display_mode + 1;
+    if(display_change)
+        display_mode <= display_mode + 1;
+    display_change = ~display_change;
 end
 
 /*
