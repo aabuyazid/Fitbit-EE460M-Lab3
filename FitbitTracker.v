@@ -25,7 +25,6 @@ reg [15:0] high_activity_counter = 0;
 reg [15:0] displayed_high_activity_counter = 0;
 reg [15:0] distance_traveled = 0;
 reg [15:0] over32_time = 0;
-reg [15:0] over32_highest_time = 0;
 
 assign display = display_reg;
 assign is_miles = is_miles_reg;
@@ -64,7 +63,7 @@ Updates steps_per_sec
 */
 always @(posedge pulse, posedge reset, posedge second) 
 begin
-    if(reset || second) 
+    if(reset) 
         steps_per_sec <= 0;
     else 
         steps_per_sec <= steps_per_sec + 1;
@@ -80,16 +79,9 @@ begin
         nine_seconds_counter <= 0;
     end
     else begin
-        if(nine_seconds_counter >= 9 || under32) begin
-            if(over32_highest_time < over32_time)
-                over32_highest_time <= over32_time;
-        end    
-        else begin
+        if(!(nine_seconds_counter >= 9 || under32)) begin
             if(steps_per_sec <= 32) begin  
-                if(over32_highest_time < over32_time) begin 
-                    over32_highest_time <= over32_time;
-                    under32 <= 1;
-                end
+                under32 <= 1;
             end
             else begin 
                 over32_time <= over32_time + 1;
@@ -149,7 +141,7 @@ begin
             SI_reg = 0;
         end
         2: begin    
-            display_reg = over32_highest_time;
+            display_reg = over32_time;
             is_miles_reg = 0;
             SI_reg = 0;
         end
