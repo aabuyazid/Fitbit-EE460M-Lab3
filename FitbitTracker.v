@@ -36,10 +36,11 @@ Defines a second based on CLK
 */
 always @(posedge clk) 
 begin
-    if(second_divider == 500000) begin 
+    if(second_divider == 50000000) begin 
         second <= ~second;
         second_divider <= 0;
     end
+    else
     second_divider <= second_divider + 1;
 end
 
@@ -49,9 +50,9 @@ Updates total_steps and distance_traveled
 always @(posedge pulse, posedge reset) 
 begin
     if(reset) 
-        total_steps = 0;
+        total_steps <= 0;
     else 
-        total_steps = total_steps + 1;
+        total_steps <= total_steps + 1;
 end
 
 always @(*) begin
@@ -61,39 +62,40 @@ end
 /*
 Updates steps_per_sec
 */
-always @(posedge pulse, posedge reset) 
+always @(posedge pulse, posedge reset, posedge second) 
 begin
-    if(reset) 
-        steps_per_sec = 0;
+    if(reset || second) 
+        steps_per_sec <= 0;
     else 
-        steps_per_sec = steps_per_sec + 1;
+        steps_per_sec <= steps_per_sec + 1;
 end
 /*
 Handles how to Steps over 32/sec
 */
-always @(posedge second)
+always @(posedge second, posedge reset)
 begin
-    if(nine_seconds_counter < 9 && !under32) begin
-        if(steps_per_sec < 32) begin  
-            if(over32_highest_time < over32_time) begin 
-                over32_highest_time <= over32_time;
-                under32 <= 1;
-            end
-        end
-        else begin 
-            over32_time <= over32_highest_time + 1;
-            nine_seconds_counter <= nine_seconds_counter + 1;
-        end
-    end
-    else if(nine_seconds_counter == 9) begin
-        if(over32_highest_time < over32_time) begin 
-                over32_highest_time <= over32_time;
-        end
-    end
-    else if(reset) begin  
+    if(reset) begin  
         over32_time <= 0;
         under32 <= 0;
         nine_seconds_counter <= 0;
+    end
+    else begin
+        if(nine_seconds_counter >= 9 || under32) begin
+            if(over32_highest_time < over32_time)
+                over32_highest_time <= over32_time;
+        end    
+        else begin
+            if(steps_per_sec <= 32) begin  
+                if(over32_highest_time < over32_time) begin 
+                    over32_highest_time <= over32_time;
+                    under32 <= 1;
+                end
+            end
+            else begin 
+                over32_time <= over32_time + 1;
+                nine_seconds_counter <= nine_seconds_counter + 1;
+            end
+        end
     end
 end
 
@@ -116,9 +118,12 @@ end
 Cycles display_modes
 */
 always @(posedge second) begin
+    
     if(display_change)
         display_mode <= display_mode + 1;
     display_change = ~display_change;
+    
+    //display_mode = 2;
 end
 
 /*
