@@ -25,7 +25,9 @@ reg [31:0] total_steps = 0;
 reg [15:0] high_activity_counter = 0;
 reg [15:0] displayed_high_activity_counter = 0;
 reg [15:0] distance_traveled = 0;
-reg [15:0] over32_time = 0;
+reg [15:0] keepTime = 0;
+reg [15:0] keepTime2 = 0;
+reg [15:0] over32_highest_time = 0;
 
 assign display = display_reg;
 assign is_miles = is_miles_reg;
@@ -43,7 +45,6 @@ begin
     else
     second_divider <= second_divider + 1;
 end
-
 /* 
 Updates total_steps and distance_traveled
 */
@@ -59,52 +60,44 @@ always @(*) begin
     distance_traveled = total_steps >> 10;
 end
 
+
 /*
-Updates steps_per_sec
+Finds steps_per_sec
 */
-always @(posedge pulse, posedge reset, posedge second) 
-begin
-    if(reset || second) 
-        steps_per_sec <= 0;
-    else 
-        steps_per_sec <= steps_per_sec + 1;
+always@(posedge pulse) begin
+    if(keepTime !=keepTime2) begin
+        keepTime2 = keepTime;
+        steps_per_sec = 0;
+        end else
+            steps_per_sec = steps_per_sec +1;
 end
 /*
 Handles how to Steps over 32/sec
 */
-always @(posedge second, posedge reset)
-begin
-    if(reset) begin  
-        over32_time <= 0;
-        under32 <= 0;
-        nine_seconds_counter <= 0;
+always@(posedge second) begin
+    if (reset) begin
+        nine_seconds_counter = 0;
+        over32_highest_time = 0;
+        end else
+    if(nine_seconds_counter < 9) begin
+        if(steps_per_sec >= 6'd32)
+            over32_highest_time = over32_highest_time + 1;
+        nine_seconds_counter = nine_seconds_counter + 1;
     end
-    else begin
-        if(!(nine_seconds_counter >= 9 || under32)) begin
-            if(steps_per_sec <= 32) begin  
-                under32 <= 1;
-            end
-            else begin 
-                over32_time <= over32_time + 1;
-                nine_seconds_counter <= nine_seconds_counter + 1;
-            end
-        end
-    end
-end
-
+end    
 /*
 Handles high activity
 */
 always @(posedge second) 
 begin
     if(high_activity_counter < 60) begin
-        if(steps_per_sec >= 64)
+        if(steps_per_sec >= 63)
             high_activity_counter <= high_activity_counter + 1;
         else
             high_activity_counter <= 0;
     end
     else begin
-        if(steps_per_sec >= 64) begin
+        if(steps_per_sec >= 63) begin
             if(over60) 
                 displayed_high_activity_counter <= displayed_high_activity_counter + 1; 
             else
@@ -115,7 +108,15 @@ begin
             high_activity_counter <= 0;
     end
 end
-
+/*
+updates difference
+*/
+always@(posedge second) begin
+    if(reset)
+        keepTime = 0;
+    else
+        keepTime = keepTime + 1;
+end
 /*
 Cycles display_modes
 */
@@ -151,7 +152,7 @@ begin
             SI_reg = 0;
         end
         2: begin    
-            display_reg = over32_time;
+            display_reg = over32_highest_time;
             is_miles_reg = 0;
             SI_reg = 0;
         end
