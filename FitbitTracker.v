@@ -8,6 +8,7 @@ output is_miles, SI;
 
 reg second = 0;
 reg under32 = 0;
+reg over60 = 0;
 
 reg [15:0] display_reg = 0;
 reg is_miles_reg = 0;
@@ -63,7 +64,7 @@ Updates steps_per_sec
 */
 always @(posedge pulse, posedge reset, posedge second) 
 begin
-    if(reset) 
+    if(reset || second) 
         steps_per_sec <= 0;
     else 
         steps_per_sec <= steps_per_sec + 1;
@@ -96,13 +97,22 @@ Handles high activity
 */
 always @(posedge second) 
 begin
-    if(steps_per_sec >= 64) high_activity_counter <= high_activity_counter + 1;
+    if(high_activity_counter < 60) begin
+        if(steps_per_sec >= 64)
+            high_activity_counter <= high_activity_counter + 1;
+        else
+            high_activity_counter <= 0;
+    end
     else begin
-        if(high_activity_counter >= 60) begin 
+        if(steps_per_sec >= 64) begin
+            if(over60) 
+                displayed_high_activity_counter <= displayed_high_activity_counter + 1; 
+            else
             displayed_high_activity_counter <= displayed_high_activity_counter + high_activity_counter;
+            over60 = 1;
         end
-
-        high_activity_counter <= 0;
+        else    
+            high_activity_counter <= 0;
     end
 end
 
